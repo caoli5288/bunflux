@@ -23,6 +23,7 @@ public class Main extends Plugin implements Runnable {
 	public void onLoad() {
 		File file = new File(getDataFolder(), "config.json");
 		if (!file.exists()) {
+			file.getParentFile().mkdirs();
 			try (InputStream in = getResourceAsStream("config.json")) {
 				Files.copy(in, file.toPath());
 			} catch (IOException e) {

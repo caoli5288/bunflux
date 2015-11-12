@@ -20,7 +20,7 @@
     </dependency>
     <dependency>
       <groupId>com.mengcraft</groupId>
-      <artifactId>influxdb</artifactId>
+      <artifactId>influxdb-bukkit</artifactId>
       <version>0.1</version>
     </dependency>
   </dependencies>

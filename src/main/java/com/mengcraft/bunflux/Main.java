@@ -70,7 +70,7 @@ public class Main extends Plugin implements Runnable {
 	public void run() {
 		getProxy().getScheduler().runAsync(this, () -> {
 			influx.write("player_value")
-				  .where("server", "play.915mc.com")
+				  .where("server", server)
 				  .value("value", getProxy().getOnlineCount())
 				  .flush();
 		});
@@ -82,10 +82,6 @@ public class Main extends Plugin implements Runnable {
 
 	private void setInflux(InfluxHandler influx) {
 		this.influx = influx;
-	}
-
-	private String getServer() {
-		return server;
 	}
 
 	private void setServer(String server) {

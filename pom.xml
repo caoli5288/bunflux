@@ -48,7 +48,7 @@
           <minimizeJar>true</minimizeJar>
           <artifactSet>
             <includes>
-              <include>com.mengcraft:influxdb</include>
+              <include>com.mengcraft:influxdb-bukkit</include>
             </includes>
           </artifactSet>
         </configuration>

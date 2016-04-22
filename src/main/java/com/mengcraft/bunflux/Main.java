@@ -16,76 +16,80 @@ import com.mengcraft.influxdb.InfluxHandler;
 
 public class Main extends Plugin implements Runnable {
 
-	private InfluxHandler influx;
-	private String server;
+    private InfluxHandler influx;
+    private String server;
+    private int repeat;
 
-	@Override
-	public void onLoad() {
-		File file = new File(getDataFolder(), "config.json");
-		if (!file.exists()) {
-			file.getParentFile().mkdirs();
-			try (InputStream in = getResourceAsStream("config.json")) {
-				Files.copy(in, file.toPath());
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
+    @Override
+    public void onLoad() {
+        File file = new File(getDataFolder(), "config.json");
+        if (!file.exists()) {
+            file.getParentFile().mkdirs();
+            try (InputStream in = getResourceAsStream("config.json")) {
+                Files.copy(in, file.toPath());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
 
-		try (FileInputStream in = new FileInputStream(file)) {
-			InputStreamReader reader = new InputStreamReader(in);
-			JsonObject root = new JsonParser().
-					parse(reader).
-					getAsJsonObject();
+        try (FileInputStream in = new FileInputStream(file)) {
+            InputStreamReader reader = new InputStreamReader(in);
+            JsonObject root = new JsonParser().
+                    parse(reader).
+                    getAsJsonObject();
 
-			reader.close();
+            reader.close();
 
-			setServer(root.get("server").getAsString());
-			JsonObject node = root.get("influx").getAsJsonObject();
-			setInflux(new InfluxHandler(node.get("url").getAsString(),
-					node.get("userName").getAsString(),
-					node.get("password").getAsString(),
-					node.get("database").getAsString()));
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+            setServer(root.get("server").getAsString());
+            JsonObject node = root.get("influx").getAsJsonObject();
+            setInflux(new InfluxHandler(node.get("url").getAsString(),
+                    node.get("userName").getAsString(),
+                    node.get("password").getAsString(),
+                    node.get("database").getAsString()));
+            setRepeat(root.get("repeat").getAsInt());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-		getProxy().getScheduler().runAsync(this, () -> {
-			getInflux().createDatabase();
-		});
-	}
+        getProxy().getScheduler().runAsync(this, () -> {
+            getInflux().createDatabase();
+        });
+    }
 
-	@Override
-	public void onEnable() {
-		getProxy().getScheduler().
-				schedule(this, this, 10, 10,
-						TimeUnit.SECONDS);
-	}
+    @Override
+    public void onEnable() {
+        getProxy().getScheduler().
+                schedule(this, this, repeat, repeat,
+                        TimeUnit.SECONDS);
+    }
 
-	@Override
-	public void onDisable() {
-		influx.shutdown();
-	}
+    @Override
+    public void onDisable() {
+        influx.shutdown();
+    }
 
-	@Override
-	public void run() {
-		getProxy().getScheduler().runAsync(this, () -> {
-			influx.write("player_value")
-				  .where("server", server)
-				  .value("value", getProxy().getOnlineCount())
-				  .flush();
-		});
-	}
+    @Override
+    public void run() {
+        getProxy().getScheduler().runAsync(this, () -> influx.write("player_value")
+                .where("server", server)
+                .value("value", getProxy().getOnlineCount())
+                .flush()
+        );
+    }
 
-	private InfluxHandler getInflux() {
-		return influx;
-	}
+    private InfluxHandler getInflux() {
+        return influx;
+    }
 
-	private void setInflux(InfluxHandler influx) {
-		this.influx = influx;
-	}
+    private void setInflux(InfluxHandler influx) {
+        this.influx = influx;
+    }
 
-	private void setServer(String server) {
-		this.server = server;
-	}
+    private void setServer(String server) {
+        this.server = server;
+    }
 
+    public void setRepeat(int repeat) {
+        this.repeat = repeat;
+    }
 }

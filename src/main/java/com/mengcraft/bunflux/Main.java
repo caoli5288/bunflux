@@ -58,9 +58,12 @@ public class Main extends Plugin implements Runnable {
 
     @Override
     public void onEnable() {
-        getProxy().getScheduler().
-                schedule(this, this, repeat, repeat,
-                        TimeUnit.SECONDS);
+        Plugin redisBungee = getProxy().getPluginManager().getPlugin("RedisBungee");
+        if (redisBungee != null) {
+            getProxy().getScheduler().schedule(this, new RedisSupport(this), repeat, repeat, TimeUnit.SECONDS);
+        } else {
+            getProxy().getScheduler().schedule(this, this, repeat, repeat, TimeUnit.SECONDS);
+        }
     }
 
     @Override
@@ -77,7 +80,11 @@ public class Main extends Plugin implements Runnable {
         );
     }
 
-    private InfluxHandler getInflux() {
+    public String getServer() {
+        return server;
+    }
+
+    public InfluxHandler getInflux() {
         return influx;
     }
 
